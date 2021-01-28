@@ -1,48 +1,19 @@
 import express from 'express';
 import cors from 'cors';
-import { ApolloServer, gql } from 'apollo-server-express';
+import { ApolloServer } from 'apollo-server-express';
+
+import schema from './schema';
+import resolvers from './resolvers';
+import models from './models';
 
 const app = express();
 
 app.use(cors());
 
-const schema = gql`
-  type Query {
-    me: User,
-    books: [Book]
-  }
-
-  type User {
-    username: String!
-  }
-
-  type Book {
-    title: String
-    author: String
-  }
-`;
-
-const books = [
-  {
-    title: "Harry Potter and the Chamber of Secrets",
-    author: "J.K. Rowling"
-  },
-  {
-    title: "Jurassic Park",
-    author: "Michael Crishton"
-  }
-];
-
-const resolvers = {
-  Query: {
-    me: () => ({ username: 'onizuka' }),
-    books: () => books
-  },
-};
-
 const server = new ApolloServer({
   typeDefs: schema,
   resolvers,
+  context: { me: models.users[2], models },
 });
 
 server.applyMiddleware({ app, path: '/graphql' });
